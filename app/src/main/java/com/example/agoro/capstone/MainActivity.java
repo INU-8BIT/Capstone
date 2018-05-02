@@ -9,13 +9,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
-import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringBufferInputStream;
 import java.util.Set;
 import java.util.UUID;
 
@@ -26,6 +26,8 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
     private static final int SWIPE_MIN_DISTANCE = 120;
     private static final int SWIPE_MAX_OFF_PATH = 250;
     private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+
+    String fullName = "";
 
     private final String DEVICE_ADDRESS="00:21:13:00:E1:2D";//재현
     //private final String DEVICE_ADDRESS="00:21:13:00:F5:F4";
@@ -42,6 +44,22 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
     byte buffer[];
     int bufferPosition;
     boolean stopThread;
+
+    String RFID[] = {
+            "e070c935",
+            "0c75c149",
+            "4850be49",
+            "52494710",
+            "42acf710"
+    };
+  /*
+    String RFID[] = {
+            "070c935",
+            "c75c149",
+            "850be49",
+            "2494710",
+            "2acf710"
+    };*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -211,14 +229,22 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
                         int byteCount = inputStream.available();
                         if(byteCount > 0)
                         {
-                            byte[] rawBytes = new byte[byteCount];
+                            final byte[] rawBytes = new byte[byteCount];
                             inputStream.read(rawBytes);
                             final String string=new String(rawBytes,"UTF-8");
                             handler.post(new Runnable() {
                                 public void run()
                                 {
                                     //textView.append(string);
-                                    Toast.makeText(getApplicationContext(), string,Toast.LENGTH_SHORT).show();
+                                    if(fullName.length() > 8)
+                                        fullName = "";
+                                    fullName = fullName + string;
+                                    Toast.makeText(getApplicationContext(), fullName,Toast.LENGTH_SHORT).show();
+                                    for(int i = 0; i < RFID.length; i++) {
+                                        if (string.matches(RFID[i])) {
+                                            Toast.makeText(getApplicationContext(), i,Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
                                 }
                             });
 
