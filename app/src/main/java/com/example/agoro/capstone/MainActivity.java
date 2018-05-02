@@ -241,7 +241,7 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
                                     fullName = fullName + string;
                                     Toast.makeText(getApplicationContext(), fullName,Toast.LENGTH_SHORT).show();
                                     for(int i = 0; i < RFID.length; i++) {
-                                        if (string.matches(RFID[i])) {
+                                        if (RFID[i].matches(string)) {
                                             Toast.makeText(getApplicationContext(), i,Toast.LENGTH_SHORT).show();
                                         }
                                     }
