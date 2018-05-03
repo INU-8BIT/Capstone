@@ -7,8 +7,10 @@ import android.content.Intent;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringBufferInputStream;
+import java.nio.charset.Charset;
 import java.util.Set;
 import java.util.UUID;
 
@@ -59,11 +62,12 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
             "850be49",
             "2494710",
             "2acf710"
-    };*/
-
+    };
+*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON); //display on
         textview = new TextView(this);
         textview.setText("Gesture Demo");
 
@@ -105,18 +109,26 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
             // right to left swipe
             if (e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
                 Toast.makeText(getApplicationContext(), "Left Swipe", Toast.LENGTH_SHORT).show();
+                Intent RFIDIntent = new Intent(getApplicationContext(), RFIDActivity.class);
+                startActivity(RFIDIntent);
             }
             // left to right swipe
             else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
                 Toast.makeText(getApplicationContext(), "Right Swipe", Toast.LENGTH_SHORT).show();
+                Intent RouteIntent = new Intent(getApplicationContext(), RouteActivity.class);
+                startActivity(RouteIntent);
             }
             // down to up swipe
             else if (e1.getY() - e2.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
                 Toast.makeText(getApplicationContext(), "Swipe up", Toast.LENGTH_SHORT).show();
+                Intent InfoIntent = new Intent(getApplicationContext(), InfoActivity.class);
+                startActivity(InfoIntent);
             }
             // up to down swipe
             else if (e2.getY() - e1.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
                 Toast.makeText(getApplicationContext(), "Swipe down", Toast.LENGTH_SHORT).show();
+                Intent BusIntent = new Intent(getApplicationContext(), BusActivity.class);
+                startActivity(BusIntent);
             }
         } catch (Exception e) {
 
@@ -157,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
         if(!bluetoothAdapter.isEnabled())
         {
             Intent enableAdapter = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableAdapter, 0);
+            startActivityForResult(enableAdapter, 2);
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -229,21 +241,24 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
                         int byteCount = inputStream.available();
                         if(byteCount > 0)
                         {
+
                             final byte[] rawBytes = new byte[byteCount];
-                            inputStream.read(rawBytes);
-                            final String string=new String(rawBytes,"UTF-8");
+                            inputStream.read(rawBytes, 0, byteCount); // 0과 byteCount 추가함
+                            String string = new String(rawBytes, "UTF-8");
+                            //String string = new String(rawBytes, 0, byteCount);
+                            Log.d("string", string);
                             handler.post(new Runnable() {
                                 public void run()
                                 {
                                     //textView.append(string);
-                                    if(fullName.length() > 8)
-                                        fullName = "";
-                                    fullName = fullName + string;
-                                    Toast.makeText(getApplicationContext(), fullName,Toast.LENGTH_SHORT).show();
-                                    for(int i = 0; i < RFID.length; i++) {
-                                        if (RFID[i].matches(string)) {
-                                            Toast.makeText(getApplicationContext(), i,Toast.LENGTH_SHORT).show();
+                                    if(fullName.length() > 8){
+                                        Toast.makeText(getApplicationContext(), "here", Toast.LENGTH_SHORT).show();
+                                        for(int i = 0; i < RFID.length; i++) {
+                                            if (fullName.matches(RFID[i])) {
+                                                Toast.makeText(getApplicationContext(), "found" + i+1,Toast.LENGTH_SHORT).show();
+                                            }
                                         }
+                                        fullName = "";
                                     }
                                 }
                             });
@@ -260,5 +275,6 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
 
         thread.start();
     }
+
 
 }
